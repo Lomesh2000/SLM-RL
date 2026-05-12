@@ -1,28 +1,46 @@
-# Core training stack — versions verified against PyPI (May 2026)
-# NOTE: flash-attn install is hardware-dependent; omit if your GPU/CUDA doesn't support it.
-# On Kaggle P100 (CUDA 11.x), flash_attention_2 is NOT supported — set USE_FLASH_ATTN=0
-torch>=2.2.0
-transformers==4.57.6
+# requirements.txt for HuggingFace Training Job
+# ALL versions verified against the current runtime environment (May 2026):
+#   torch 2.11.0+cu130, transformers 5.8.0, trl 1.4.0, peft 0.19.1
+#   datasets 4.8.5, accelerate 1.13.0
+#
+# HF Training Jobs pre-install torch — do NOT re-pin torch here or you risk
+# a CUDA toolkit mismatch. Let HF provide torch.
+#
+# VERSION DECISIONS:
+#   transformers>=4.56.2  — minimum required by trl 1.4.0; current env has 5.8.0 (fine)
+#   trl==1.4.0            — pinned: GRPOConfig field names (beta, max_completion_length)
+#                           are verified against this exact version
+#   peft==0.19.1          — pinned: PeftModel.from_pretrained signature verified
+#   datasets>=4.7.0       — minimum required by trl 1.4.0; current 4.8.5 satisfies
+#   accelerate>=1.4.0     — minimum required by trl 1.4.0; current 1.13.0 satisfies
+#   lm_eval==0.4.3        — pinned: task names and metric keys verified
+#   bitsandbytes>=0.43.0  — for optional 4-bit loading; not pre-installed on HF
+
+transformers>=4.56.2
 trl==1.4.0
 peft==0.19.1
-accelerate>=0.34.0
-datasets>=2.21.0
-bitsandbytes>=0.43.0          # for 8-bit/4-bit quantisation; optional on full-VRAM runs
+datasets>=4.7.0
+accelerate>=1.4.0
+safetensors>=0.4.0
+huggingface_hub>=0.25.0
 
 # Evaluation
 lm_eval==0.4.3
 
-# Logging & config
-wandb>=0.16.0
-pyyaml>=6.0
+# bitsandbytes: optional — remove if you hit install errors on the HF runner
+# Only needed if you use load_in_4bit=True in loader.py
+bitsandbytes>=0.43.0
 
 # Utilities
+pyyaml>=6.0
 numpy>=1.26.0
 pandas>=2.0.0
 scipy>=1.11.0
 tqdm>=4.66.0
-sentencepiece>=0.1.99         # required by some tokenisers
+sentencepiece>=0.1.99
 protobuf>=3.20.0
+wandb>=0.16.0
 
-# Optional — only install if GPU supports CUDA 11.8+ and you're not on P100
-# flash-attn>=2.5.0
+# hf_transfer: optional but strongly recommended on HF — speeds up model downloads
+# significantly (Phi-3-mini is ~7GB). Set HF_HUB_ENABLE_HF_TRANSFER=1 in env vars.
+hf_transfer>=0.1.6
