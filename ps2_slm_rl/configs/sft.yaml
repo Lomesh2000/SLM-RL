@@ -1,0 +1,57 @@
+# configs/sft.yaml
+# Verified field names against SFTConfig in trl==1.4.0
+
+model:
+  base_id: "microsoft/Phi-3-mini-4k-instruct"
+  # HALLUCINATION NOTE: Phi-3-mini supports "flash_attention_2" on Ampere+ GPUs.
+  # On Kaggle P100 (Turing/Pascal), set this to "eager" or "sdpa".
+  attn_implementation: "eager"
+  torch_dtype: "bfloat16"   # use "float16" on P100 if bfloat16 unsupported
+
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  # Target modules for Phi-3-mini. Verified from Phi-3 architecture.
+  # HALLUCINATION NOTE: exact module names depend on the model.
+  # Run src/model/loader.py --print-modules to list them for your checkpoint.
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_up_proj"   # Phi-3 uses fused gate_up_proj (not separate gate_proj/up_proj)
+    - "down_proj"
+
+data:
+  gsm8k_name: "openai/gsm8k"
+  gsm8k_config: "main"
+  aqua_rat_name: "aqua_rat"
+  aqua_rat_config: "raw"
+  gsm8k_fraction: 0.80
+  aqua_fraction: 0.20
+  max_seq_length: 1024
+  val_size: 200     # examples held out from GSM8K train for validation
+
+training:
+  output_dir: "checkpoints/sft"
+  num_train_epochs: 2
+  per_device_train_batch_size: 2
+  gradient_accumulation_steps: 8    # effective batch size = 16
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.05
+  bf16: true
+  gradient_checkpointing: true
+  logging_steps: 20
+  save_strategy: "epoch"
+  eval_strategy: "steps"
+  eval_steps: 100
+  save_total_limit: 2
+  report_to: "wandb"
+  run_name: "sft-phi3-mini-gsm8k"
+
+wandb:
+  project: "ps2-slm-rl"

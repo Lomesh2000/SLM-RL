@@ -1,0 +1,28 @@
+# Core training stack — versions verified against PyPI (May 2026)
+# NOTE: flash-attn install is hardware-dependent; omit if your GPU/CUDA doesn't support it.
+# On Kaggle P100 (CUDA 11.x), flash_attention_2 is NOT supported — set USE_FLASH_ATTN=0
+torch>=2.2.0
+transformers==4.57.6
+trl==1.4.0
+peft==0.19.1
+accelerate>=0.34.0
+datasets>=2.21.0
+bitsandbytes>=0.43.0          # for 8-bit/4-bit quantisation; optional on full-VRAM runs
+
+# Evaluation
+lm_eval==0.4.3
+
+# Logging & config
+wandb>=0.16.0
+pyyaml>=6.0
+
+# Utilities
+numpy>=1.26.0
+pandas>=2.0.0
+scipy>=1.11.0
+tqdm>=4.66.0
+sentencepiece>=0.1.99         # required by some tokenisers
+protobuf>=3.20.0
+
+# Optional — only install if GPU supports CUDA 11.8+ and you're not on P100
+# flash-attn>=2.5.0

@@ -1,0 +1,26 @@
+# configs/curriculum.yaml
+
+curriculum:
+  enabled: true
+  window_size: 200         # rolling accuracy window (number of examples)
+  min_window_before_advance: 200   # must see at least this many before gating
+  thresholds:
+    easy_to_medium: 0.65   # advance when rolling acc >= this
+    medium_to_hard: 0.60
+  stages:
+    - name: "easy"
+      difficulties: [1]
+    - name: "medium"
+      difficulties: [1, 2]
+    - name: "hard"
+      difficulties: [1, 2, 3]
+
+difficulty:
+  # Weights for the composite difficulty score
+  step_weight: 0.5
+  op_weight: 0.3
+  number_weight: 0.2
+  # Score thresholds
+  easy_max: 4.0
+  medium_max: 8.0
+  # > medium_max => hard
